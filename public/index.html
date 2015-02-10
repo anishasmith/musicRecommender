@@ -16,7 +16,7 @@
         <div id='content'>
             <h2 id='title'> Music Recommender </h2>
             <div class="description">
-                Given a genre, this app shows a list of artists you may like and allows you to search for similar artists that you may like.
+                Given a genre, this app shows a list of artists you may like and allows you to search for other artists that you may like.
             </div>
             <br/>
 
@@ -80,42 +80,69 @@ var config = getConfig();
 
 
 
+/* FUTURE FUNCTIONALITY - input artist name, fetches 6 songs that are similar to music by that artist by one degree of variance */
+// function fetchSimilarArtistSongsPlaylist(artist, variety) { // fetches songs that are similar to a particular artist seed
+//     var url = config.echoNestHost + 'api/v4/playlist/static';
+//     $("#ulwrapper").empty(); // clear results list
+//     $("#hwrapper").empty(); // clear results title
+//     $("#spotify-player").empty(); // remove Spotify player in case there is already one on the page
+//     info("Creating your playlist ...");
+//     $.getJSON(url, {
+//             'artist': artist, 
+//             'api_key': config.apiKey,
+//             'bucket': [ 'id:' + config.spotifySpace, 'tracks'],
+//             'limit' : true,
+//             'variety' : 1,
+//             'results': 6,
+//             'type':'artist-radio',  }) 
+//         .done(function(data) {
+//             info("");
+//             if (! ('songs' in data.response)) {
+//                 info("Can't find that artist");
+//             } else {
+//                 var title = "Artist radio for " + artist;
+//                 var spotifyPlayButton = getSpotifyPlayButtonForPlaylist(title, data.response.songs);
+//                 $("#spotify-player").append(spotifyPlayButton);
+//             }
+//         })
+//         .error( function() {
+//             info("Whoops, had some trouble getting that playlist");
+//         }) ;
+// }
 
-function fetchSimilarArtistSongsPlaylist(artist, variety) { // fetches songs that are similar to a particular artist seed
-    var url = config.echoNestHost + 'api/v4/playlist/static';
-    $("#ulwrapper").empty();
-    $("#hwrapper").empty();
-    $("#spotify-player").empty();
-    info("Creating your playlist ...");
-    $.getJSON(url, {
-            'artist': artist, 
-            'api_key': config.apiKey,
-            'bucket': [ 'id:' + config.spotifySpace, 'tracks'],
-            'limit' : true,
-            'variety' : 1,
-            'results': 10,
-            'type':'artist-radio',  }) 
-        .done(function(data) {
-            info("");
-            if (! ('songs' in data.response)) {
-                info("Can't find that artist");
-            } else {
-                var title = "Artist radio for " + artist;
-                var spotifyPlayButton = getSpotifyPlayButtonForPlaylist(title, data.response.songs);
-                $("#spotify-player").append(spotifyPlayButton);
-            }
-        })
-        .error( function() {
-            info("Whoops, had some trouble getting that playlist");
-        }) ;
-}
+/* FUTURE FUNCTIONALITY - input artist name, return 6 artists that are similar to input artist */
+// function fetchSimilarArtists(artist, callback) { // make API call to find similar songs
+//     info("Getting similar artists ...");
+//     var url = config.echoNestHost + 'api/v4/artist/similar';
+//     $("#ulwrapper").empty(); // clear results list
+//     $("#hwrapper").empty(); // clear results title
+//     $.getJSON(url, { 
+//             'api_key': config.apiKey,
+//             'id' : artist.id,
+//             'bucket': [ 'id:' + config.spotifySpace], 
+//             'results': 6,
+//             'limit' : true,
+//           }) 
+//         .done(function(data) {
+//             info("");
+//             if (data.response.status.code == 0 && data.response.artists.length > 0) {
+//                 callback(data.response.artists);
+//             } else {
+//                 info("No similars for " + artist.name);
+//             }
+//         })
+//         .error( function() {
+//             info("Whoops, had some trouble getting that ist");
+//         }) ;
+// }
 
+/* Gets playlist of 10 songs by a given artist */
 function fetchArtistPlaylist(artist) { // fetches and displays a playlist for a particular artist
     var url = config.echoNestHost + 'api/v4/playlist/static';
-    $("#ulwrapper").empty();
-    $("#hwrapper").empty();
-    $("#spotify-player").empty();
-    info("Creating the playlist ...");
+    $("#ulwrapper").empty(); // clear results list
+    $("#hwrapper").empty(); // clear results title
+    $("#spotify-player").empty(); // remove Spotify player in case there is already one on the page
+    info("Creating your playlist ...");
     $.getJSON(url, {
             'artist': artist, 
             'api_key': config.apiKey,
@@ -129,9 +156,9 @@ function fetchArtistPlaylist(artist) { // fetches and displays a playlist for a 
             if (! ('songs' in data.response)) {
                 info("Can't find that artist");
             } else {
-                var title = "Artist radio for " + artist;
+                var title = artist + " songs";
                 var spotifyPlayButton = getSpotifyPlayButtonForPlaylist(title, data.response.songs);
-                $("#spotify-player").append(spotifyPlayButton);
+                $("#spotify-player").append(spotifyPlayButton); // start the spotify player
             }
         })
         .error( function() {
@@ -139,33 +166,39 @@ function fetchArtistPlaylist(artist) { // fetches and displays a playlist for a 
         }) ;
 }
 
-function getGenreArtistList(artist) { // set up the divs for the artist list during a genre query
+/* set up the HTML elements for the results list from genre search
+   set up click handler for list elements */
+function getGenreArtistList(artist) {
     var listItem = $("<li>");
     listItem.addClass("artist");
     listItem.addClass("list-group-item");
     var p = $("<p class='artistName'>").text(artist.name);
-    listItem.append(p);
-    p.on('click', function(el) {
+    listItem.append(p); // add class to each list item for styling purposes
+    p.on('click', function(el) { // on click, a playlist is created of songs from only this artist
         fetchArtistPlaylist(artist.name);
     });
 
     return listItem;
 }
 
-function getArtistList(artist) { // set up the divs for the artist list during an artist query
+/* set up the HTML elements for the results list from artist search
+   set up click handler for list elements
+   separate function from getGenreArtistList() in order to handle
+   custom future functionality */
+function getArtistList(artist) {
     var listItem = $("<li>");
     listItem.addClass("artist");
     listItem.addClass("list-group-item");
     var p = $("<p class='artistName'>").text(artist.name);
     listItem.append(p);
-    p.on('click', function(el) {
+    p.on('click', function(el) { // on click, a playlist is created of songs from only this artist 
         fetchArtistPlaylist(artist.name);
     });
 
     return listItem;
 }
 
-function showResults(seed, results) { // create wrapper div for the artist results list
+function showArtistResults(seed, results) { // create wrapper div for the artist results list
     console.log("Showing similars...");
     $("#hwrapper").append($("<h2>").text("Search Results for: " + seed.name));
     $("#ulwrapper").append($("<ul class='list-group' id='list-group'>"));
@@ -190,40 +223,17 @@ function showGenreArtists(seed, artists) { // create the wrapper div for the lis
     });
 }
 
-function showArtists(seed, artists) { // wrapper to get artist list
-    // more complex filtering or searching algorithm could be used here in the future
-    showResults(seed, artists);
+/* wrapper function for showArtistResults()
+   mainly set up for custom future functionality
+   use this wrapper to direct a more specific search or filtering algorithm */
+function showArtists(seed, artists) {
+    showArtistResults(seed, artists);
 }
 
-function fetchSimilarArtists(artist, callback) { // make API call to find similar songs
-    info("Getting similar artists ...");
-    var url = config.echoNestHost + 'api/v4/artist/similar';
-    $("#ulwrapper").empty();
-    $("#hwrapper").empty();
-    $.getJSON(url, { 
-            'api_key': config.apiKey,
-            'id' : artist.id,
-            'bucket': [ 'id:' + config.spotifySpace], 
-            'results': 6,
-            'limit' : true,
-          }) 
-        .done(function(data) {
-            info("");
-            if (data.response.status.code == 0 && data.response.artists.length > 0) {
-                callback(data.response.artists);
-            } else {
-                info("No similars for " + artist.name);
-            }
-        })
-        .error( function() {
-            info("Whoops, had some trouble getting that playlist");
-        }) ;
-}
-
-
-function fetchSpotifyArtists(artists, callback) { // make API call to get Spotify artist
+/* get artist's spotify ID */
+function fetchSpotifyArtists(artists, callback) {
     var fids = [];
-    artists.forEach(function(artist) {
+    artists.forEach(function(artist) { // use conversion function from spotify_en_tools.js
         fids.push(fidToSpid(artist.foreign_ids[0].foreign_id));
     });
 
@@ -235,14 +245,16 @@ function fetchSpotifyArtists(artists, callback) { // make API call to get Spotif
             callback(artists);
         })
         .error( function() {
-            info("Whoops, had some trouble getting that playlist");
+            info("Whoops, had some trouble getting that information");
         }) ;
 }
 
+/* search for particular Spotify artist
+   return (list of) matching artist(s) */
 function searchArtist(name, callback) { // search for artist by name
     var url = config.echoNestHost + 'api/v4/artist/search';
-    $("#ulwrapper").empty();
-    $("#hwrapper").empty();
+    $("#ulwrapper").empty(); // clear results list
+    $("#hwrapper").empty(); // clear results title
     info("Searching for artists ...");
     $.getJSON(url, {
             'api_key': config.apiKey,
@@ -259,11 +271,12 @@ function searchArtist(name, callback) { // search for artist by name
         }) ;
 }
 
+/* search for any artists within a particular Spotify genre */
 function searchGenre(name, callback) { // search for artists in a particular genre
     var url = config.echoNestHost + 'api/v4/artist/search';
-    $("#ulwrapper").empty();
-    $("#hwrapper").empty();
-    name = name.toString().toLowerCase();
+    $("#ulwrapper").empty(); // clear results list
+    $("#hwrapper").empty(); // clear results title
+    name = name.toString().toLowerCase(); // Spotify API is genre case sensitive
     $.getJSON(url, {
             'api_key': config.apiKey,
             'genre' : name, 
@@ -277,7 +290,8 @@ function searchGenre(name, callback) { // search for artists in a particular gen
         });
 }
 
-function newArtist() { // start search for new artist
+/* start a new search for an artist given input artist name */
+function newArtist() {
     var artist = $("#artist").val();
     searchArtist(artist, function(data) {
         if (data.response.status.code == 0 && data.response.artists.length > 0) {
@@ -291,7 +305,9 @@ function newArtist() { // start search for new artist
     });
 }
 
-function newArtistsForGenre() { // Provides a list of hot artists in a particular genre
+/* wrapper function for genre search functionality
+   initialize artist search UI after genre search is complete */
+function newArtistsForGenre() { // Provides a list of artists in a particular genre
     var genre = $("#genre").val();
     searchGenre(genre, function(data) {
         if (data.response.status.code == 0 && data.response.artists.length > 0) {
@@ -304,10 +320,12 @@ function newArtistsForGenre() { // Provides a list of hot artists in a particula
 
 }
 
+/* hide genre search box, show the artist search box
+   check for null input in artist search box */
 function initArtistUI() {
     $("#seed-artist").show();
     hideGenreUI(); // hide genre search box
-    $("#artist").on('keydown', function(evt) {
+    $("#artist").on('keydown', function(evt) { // allow key enter
         if (evt.keyCode == 13) {
             if($("#artist").val() != "") { // null check
                 newArtist();
@@ -321,9 +339,11 @@ function initArtistUI() {
     });
 }
 
+/* hide the artist search box, show the genre search box
+   check for null input in artist search box */
 function initUI() {
     hideArtistUI(); // hide artist search box
-    $("#genre").on('keydown', function(evt) {
+    $("#genre").on('keydown', function(evt) { // allow key enter
         if (evt.keyCode == 13) {
             if($("#genre").val() != "") { // null check
                 newArtistsForGenre();
@@ -337,21 +357,25 @@ function initUI() {
     });
 }
 
+/* hide genre search box */
 function hideGenreUI() {
     $("#seed-genre").hide();
 }
 
+/* hide artist search box */
 function hideArtistUI() {
     $("#seed-artist").hide();
 
 }
 
+/* print intermitant messages during playlist creation,
+   artist search, etc. */
 function info(txt) {
     $("#info").text(txt);
 }
 
 $(document).ready(function() {
-    initUI();
+    initUI(); // start with genre search
     
 });
 
