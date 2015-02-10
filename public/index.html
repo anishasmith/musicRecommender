@@ -82,7 +82,6 @@ var config = getConfig();
 
 
 function fetchSimilarArtistSongsPlaylist(artist, variety) { // fetches songs that are similar to a particular artist seed
-    console.log("Fetching Similar Artist Songs Playlist...");
     var url = config.echoNestHost + 'api/v4/playlist/static';
     $("#ulwrapper").empty();
     $("#hwrapper").empty();
@@ -112,7 +111,6 @@ function fetchSimilarArtistSongsPlaylist(artist, variety) { // fetches songs tha
 }
 
 function fetchArtistPlaylist(artist) { // fetches and displays a playlist for a particular artist
-    console.log("Fetching Artist Playlist...");
     var url = config.echoNestHost + 'api/v4/playlist/static';
     $("#ulwrapper").empty();
     $("#hwrapper").empty();
@@ -142,7 +140,6 @@ function fetchArtistPlaylist(artist) { // fetches and displays a playlist for a 
 }
 
 function getGenreArtistList(artist) { // set up the divs for the artist list during a genre query
-    console.log("Getting (genre) artist div...");
     var listItem = $("<li>");
     listItem.addClass("artist");
     listItem.addClass("list-group-item");
@@ -156,7 +153,6 @@ function getGenreArtistList(artist) { // set up the divs for the artist list dur
 }
 
 function getArtistList(artist) { // set up the divs for the artist list during an artist query
-    console.log("Getting artist div...");
     var listItem = $("<li>");
     listItem.addClass("artist");
     listItem.addClass("list-group-item");
@@ -182,11 +178,8 @@ function showResults(seed, results) { // create wrapper div for the artist resul
     });
 }
 
-function showGenreArtists(seed, artists) { // create the wrapper div for the list of artists in a genre
-    console.log("Showing artists for this genre...");
-    
+function showGenreArtists(seed, artists) { // create the wrapper div for the list of artists in a genre    
     $("#hwrapper").append($("<h2>").text("Artists in Genre: " + seed)); // .name not necessary for genre
-
     $("#ulwrapper").append($("<ul class='list-group' id='list-group'>"));
     var ul = $("#list-group");
     artists.forEach(function(artist) {
@@ -199,7 +192,6 @@ function showGenreArtists(seed, artists) { // create the wrapper div for the lis
 
 function showArtists(seed, artists) { // wrapper to get artist list
     // more complex filtering or searching algorithm could be used here in the future
-    console.log('show artists', seed, artists);
     showResults(seed, artists);
 }
 
@@ -231,9 +223,7 @@ function fetchSimilarArtists(artist, callback) { // make API call to find simila
 
 function fetchSpotifyArtists(artists, callback) { // make API call to get Spotify artist
     var fids = [];
-    console.log("fetching spotify artists: ", artists);
     artists.forEach(function(artist) {
-        console.log("each artist:", artist);
         fids.push(fidToSpid(artist.foreign_ids[0].foreign_id));
     });
 
@@ -270,12 +260,10 @@ function searchArtist(name, callback) { // search for artist by name
 }
 
 function searchGenre(name, callback) { // search for artists in a particular genre
-    console.log("Searching for artists in genre ...");
     var url = config.echoNestHost + 'api/v4/artist/search';
     $("#ulwrapper").empty();
     $("#hwrapper").empty();
     name = name.toString().toLowerCase();
-    console.log("name:", name);
     $.getJSON(url, {
             'api_key': config.apiKey,
             'genre' : name, 
@@ -286,24 +274,16 @@ function searchGenre(name, callback) { // search for artists in a particular gen
         })
         .error( function() {
             info("Whoops, had some trouble finding that genre");
-        }) ;
-    console.log("url: ", url);
+        });
 }
 
 function newArtist() { // start search for new artist
-    console.log("New artist...");
     var artist = $("#artist").val();
-
-    console.log('searching for', artist);
     searchArtist(artist, function(data) {
-        console.log('search', data);
         if (data.response.status.code == 0 && data.response.artists.length > 0) {
             var seed = data.response.artists[0];
             fetchSpotifyArtists([seed], function(seeds) {
-                console.log("seed", seed);
-                // fetchSpotifyArtists(seeds[0], function(similars) {
                          showArtists(seed, data.response.artists);
-                // });
             });
         } else {
             info("Aw, couldn't find that artist.");
@@ -312,11 +292,7 @@ function newArtist() { // start search for new artist
 }
 
 function newArtistsForGenre() { // Provides a list of hot artists in a particular genre
-    console.log("New Artists for genre...");
-
     var genre = $("#genre").val();
-
-    console.log('genre: ', genre);
     searchGenre(genre, function(data) {
         if (data.response.status.code == 0 && data.response.artists.length > 0) {
             showGenreArtists(genre, data.response.artists);
@@ -329,7 +305,6 @@ function newArtistsForGenre() { // Provides a list of hot artists in a particula
 }
 
 function initArtistUI() {
-    console.log("Init artist UI...");
     $("#seed-artist").show();
     hideGenreUI(); // hide genre search box
     $("#artist").on('keydown', function(evt) {
@@ -347,7 +322,6 @@ function initArtistUI() {
 }
 
 function initUI() {
-    console.log("Init genre UI...");
     hideArtistUI(); // hide artist search box
     $("#genre").on('keydown', function(evt) {
         if (evt.keyCode == 13) {
@@ -364,12 +338,10 @@ function initUI() {
 }
 
 function hideGenreUI() {
-    console.log("Hiding genre UI...");
     $("#seed-genre").hide();
 }
 
 function hideArtistUI() {
-    console.log("Hiding artist UI...");
     $("#seed-artist").hide();
 
 }
